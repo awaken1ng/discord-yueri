@@ -56,9 +56,9 @@ class Yueri(discord.Client):
             if servers and message.author.guild.id not in servers:
                 return
             logging.info(
-                f'User {message.author.name}#{message.author.discriminator} ({message.author.id}) '
-                f'on server {message.guild.name} ({message.guild.id}) '
-                f'used command {plugin.name} with arguments: {args}')
+                f"User {message.author.name}#{message.author.discriminator} ({message.author.id}) "
+                f"on server {message.guild.name} ({message.guild.id}) "
+                f"used command '{plugin.name}' with trigger {trigger} and arguments: {args}")
             # Permission check
             if getattr(plugin, 'permissions', None):
                 if not utils.is_permitted(message.author, plugin.permissions):
