@@ -1,0 +1,8 @@
+token = ''
+prefix = '!'
+plugins_location = 'plugins'
+permissions = {
+    'owner': {'users': []}
+    'adm': {'users': []}
+    # 'mods': {'roles': []}
+}
