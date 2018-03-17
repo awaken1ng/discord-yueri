@@ -21,7 +21,7 @@ class PluginManager:
                 filename, ext = os.path.splitext(file)
                 if ext == '.py' and not filename.startswith('__'):
                     try:
-                        plugin = importlib.import_module('.'.join((root.replace('/', '.'), filename)))
+                        plugin = importlib.import_module('.'.join((root.replace(os.path.sep, '.'), filename)))
                         # Skip disabled plugins
                         if plugin.Plugin.disabled:
                             continue
