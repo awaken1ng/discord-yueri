@@ -36,13 +36,11 @@ class Yueri(discord.Client):
             return
 
         # Parse the message
-        match = re.match(rf'{prefix}(.+)\s(.+)?|{prefix}(.+)()', message.content)
+        match = re.match(rf'{prefix}([^\s]+)\s?(.+)?', message.content)
         if not match:
             # Shouldn't ever happen, but just in case
             return
-        trigger, args = [group
-                         for group in match.groups()
-                         if not isinstance(group, type(None))]
+        trigger, args = match.groups()
 
         # Match the trigger with plugins
         matched_plugins = self.plugin_manager.events['on_message'].get(trigger)
