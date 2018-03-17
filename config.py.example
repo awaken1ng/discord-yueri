@@ -1,8 +1,11 @@
 token = ''
 prefix = '!'
 plugins_location = 'plugins'
+database = 'yueri'
+db_host = 'localhost'
+db_port = 27017
 permissions = {
-    'owner': {'users': []}
+    'owner': {'users': []},
     'adm': {'users': []}
     # 'mods': {'roles': []}
 }
