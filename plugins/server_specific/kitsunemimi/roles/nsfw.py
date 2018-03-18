@@ -57,6 +57,11 @@ class Plugin(ServerPlugin):
             await message.channel.send(embed=response)
             return
 
+        # Elder floofs don't need the role as they already have access
+        elder_floof = utils.find(lambda r: r.id == 398292277736243200, message.author.guild.roles)
+        if elder_floof in message.author.roles:
+            return
+
         # Assign the role if user doesn't have it
         if nsfw_role not in message.author.roles:
             nsfw_channel = utils.find(lambda c: c.id == 223235682322087937, message.author.guild.channels)
