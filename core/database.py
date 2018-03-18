@@ -10,8 +10,8 @@ class GuildSettings(Document):
 
 
 class Database:
-    def __init__(self, name: str, host: str, port: int):
-        self.connection = motorengine.connect(name, host=host, port=port)
+    def __init__(self, database: str, connection_string: str):
+        self.connection = motorengine.connect(database, host=connection_string)
 
     async def get_guild_settings(self, guild_id: int):
         settings = await GuildSettings.objects.get(guild_id=guild_id)

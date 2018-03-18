@@ -2,8 +2,7 @@ token = ''
 prefix = '!'
 plugins_location = 'plugins'
 database = 'yueri'
-db_host = 'localhost'
-db_port = 27017
+database_connection_string = f'mongodb://localhost:27017/'
 permissions = {
     'owner': {'users': []},
     'adm': {'users': []}

@@ -2,15 +2,15 @@ import discord
 import utils
 import logging
 import re
-from config import prefix, plugins_location, database, db_host, db_port
+from config import prefix, plugins_location, database, database_connection_string
 from core.plugin_manager import PluginManager
-from core.db import Database
+from core.database import Database
 
 
 class Yueri(discord.Client):
     def __init__(self):
         self.prefix = prefix
-        self.db = Database(database, db_host, db_port)
+        self.db = Database(database, database_connection_string)
         self.plugin_manager = PluginManager(plugins_location, self)
         super(Yueri, self).__init__()
 
