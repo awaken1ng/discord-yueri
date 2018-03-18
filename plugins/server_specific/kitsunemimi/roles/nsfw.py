@@ -10,10 +10,8 @@ class Plugin(ServerPlugin):
     triggers = ('nsfw', 'pervert', 'lewd')
 
     @utils.asynccontextmanager
-    async def consent(
-            self,
-            message: discord.Message, accept_keyword: str = 'yes', decline_keyword: str = 'no',
-            **kwargs) -> bool:
+    async def consent(self, message: discord.Message, accept_keyword: str = 'yes', decline_keyword: str = 'no',
+                      **kwargs) -> bool:
         consent_text = utils.create_embed(**kwargs)
         consent_msg = await message.channel.send(embed=consent_text)
         try:
@@ -23,7 +21,8 @@ class Plugin(ServerPlugin):
                     m.content.strip().lower() in (accept_keyword, decline_keyword)
                     and m.channel == message.channel
                     and m.author == message.author,
-                timeout=300)
+                timeout=300
+            )
             consented = True if consent_response.content.strip().lower() == accept_keyword else False
             # await consent_response.delete()
         except FutureTimeoutError:
@@ -34,9 +33,9 @@ class Plugin(ServerPlugin):
     async def on_message(self, message: discord.Message, trigger: str, args: list):
         nsfw_role = utils.find(lambda r: r.id == 398288236817940480, message.author.guild.roles)
         log_channel = utils.find(lambda c: c.id == 422762236189081600, message.author.guild.channels)
-        underage = await self.bot.db.get_guild_setting(message.author.guild.id, 'underage')
 
         # Check if user is in a list of known underage
+        underage = await self.bot.db.get_guild_setting(message.author.guild.id, 'underage')
         if message.author.id in underage:
             await self.log_in_channel(
                 log_channel,
@@ -84,8 +83,8 @@ class Plugin(ServerPlugin):
                                 f"has been granted {nsfw_role.name} role at {arrow.utcnow().format('YYYY-MM-DD HH:mm:ss ZZ')}",
                     colour=utils.Colours.info,
                     timestamp=arrow.utcnow().datetime)
-                response = utils.create_embed(title=f'{message.author.display_name}, {nsfw_role.name} '
-                                                    f'has been added to you.',
+                response = utils.create_embed(title=message.author.display_name,
+                                              description=f'{nsfw_role.name} has been added to you.',
                                               icon=message.author.avatar_url,
                                               colour=nsfw_role.colour)
                 await message.channel.send(embed=response)

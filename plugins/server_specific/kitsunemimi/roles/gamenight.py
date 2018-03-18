@@ -17,8 +17,8 @@ class Plugin(ServerPlugin):
             action = ('removed', 'from')
             await message.author.remove_roles(role)
 
-        response = utils.create_embed(title='{}, {} has been {} {} you.'
-                                        .format(message.author.display_name, role.name, *action),
+        response = utils.create_embed(title=message.author.display_name,
+                                      description='{} has been {} {} you.'.format(role.name, *action),
                                       icon=message.author.avatar_url,
                                       colour=role.colour)
         await message.channel.send(embed=response)
