@@ -7,7 +7,6 @@ if __name__ == '__main__':
     # Setup logging
     logging.basicConfig(
         level=20,  # 50 - critical, 40 - error, 30 - warning, 20 - info, 10 - debug
-        datefmt='%Y-%m-%d %H:%M:%S,%03d',
         style='{',
         format='{asctime} | {levelname:8} | {name} | {message}'
     )
