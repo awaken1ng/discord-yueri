@@ -24,7 +24,7 @@ class Plugin(ServerPlugin):
                     and m.channel == message.channel
                     and m.author == message.author,
                 timeout=300)
-            consented = True if consent_response.content == 'yes' else False
+            consented = True if consent_response.content.strip().lower() == accept_keyword else False
             # await consent_response.delete()
         except FutureTimeoutError:
             consented = False
