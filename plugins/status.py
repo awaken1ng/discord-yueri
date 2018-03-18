@@ -22,7 +22,7 @@ class Plugin(BasePlugin):
         )
         host = (
             'Host',
-            f'CPU: **{cpu_load:.2f}%** at **{cpu_freq.current:.2f} Mhz**\n'
+            f'CPU: **{cpu_load:.2f}%** {" at **{:.2f} Mhz**".format(cpu_freq.current) if cpu_freq else ""}\n'
             f'Memory: **{memory[0]}**/**{memory[1]}**'
         )
         response = utils.create_embed(
