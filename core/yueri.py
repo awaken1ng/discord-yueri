@@ -37,6 +37,9 @@ class Yueri(discord.Client):
         # Return if there are no plugins with `on_message` implemented
         if 'on_message' not in self.plugin_manager.events.keys():
             return
+        # Ignore direct messages and group channels
+        if isinstance(message.channel, (discord.DMChannel, discord.GroupChannel)):
+            return
         # Ignore messages that don't start with prefix
         if not message.content.startswith(prefix):
             return
@@ -60,7 +63,7 @@ class Yueri(discord.Client):
         for plugin in matched_plugins:
             # If plugin is server-restricted, do a check
             servers = getattr(plugin, 'servers', ())
-            if servers and message.author.guild.id not in servers:
+            if servers and message.guild.id not in servers:
                 return
             logging.info(
                 f"User '{message.author.name}#{message.author.discriminator}' ({message.author.id}) "
