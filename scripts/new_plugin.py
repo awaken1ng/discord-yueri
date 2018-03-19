@@ -18,6 +18,9 @@ class Plugin(BasePlugin):
     triggers = ('',)
     permissions = ('owner',)
     
+    async def on_ready(self):
+        pass
+    
     async def on_message(self, message: discord.Message, trigger: str, args: list):
         pass
         

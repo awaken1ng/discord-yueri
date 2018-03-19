@@ -13,6 +13,9 @@ class BasePlugin:
     def __init__(self, bot_instance: Yueri):
         self.bot = bot_instance
 
+    async def on_ready(self):
+        pass
+
     async def on_message(self, message: discord.Message, trigger: str, args: list):
         """
         :param message: Message the plugin was called with

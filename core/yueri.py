@@ -23,6 +23,11 @@ class Yueri(discord.Client):
 
     async def on_ready(self):
         logging.info(f'Logged in as {self.user.name}#{self.user.discriminator} with user ID {self.user.id}')
+        # Return if there are no plugins with `on_ready` implemented
+        if 'on_ready' not in self.plugin_manager.events.keys():
+            return
+        for plugin in self.plugin_manager.events['on_ready']:
+            await plugin.on_ready()
 
     async def on_message(self, message: discord.Message):
         # Return if there are no plugins with `on_message` implemented
