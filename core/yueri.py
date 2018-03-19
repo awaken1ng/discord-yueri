@@ -64,7 +64,7 @@ class Yueri(discord.Client):
             # If plugin is server-restricted, do a check
             servers = getattr(plugin, 'servers', ())
             if servers and message.guild.id not in servers:
-                return
+                continue
             logging.info(
                 f"User '{message.author.name}#{message.author.discriminator}' ({message.author.id}) "
                 f"on server '{message.guild.name}' ({message.guild.id}) "
@@ -72,7 +72,7 @@ class Yueri(discord.Client):
             # Permission check
             if getattr(plugin, 'permissions', None):
                 if not utils.is_permitted(message.author, plugin.permissions):
-                    return
+                    continue
             # Execute plugin
             await plugin.on_message(message, trigger, args.split() if args else None)
 
