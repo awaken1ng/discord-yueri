@@ -27,6 +27,10 @@ class Yueri(discord.Client):
         if 'on_ready' not in self.plugin_manager.events.keys():
             return
         for plugin in self.plugin_manager.events['on_ready']:
+            # Server check, if bot is not in any of the guilds, skip the event execution for this plugin
+            if not any([self.get_guild(server_id)
+                        for server_id in getattr(plugin, 'servers', ())]):
+                continue
             await plugin.on_ready()
 
     async def on_message(self, message: discord.Message):
