@@ -8,7 +8,7 @@ if __name__ == '__main__':
     logging.basicConfig(
         level=20,  # 50 - critical, 40 - error, 30 - warning, 20 - info, 10 - debug
         style='{',
-        format='{asctime} | {levelname:8} | {name} | {message}'
+        format='{asctime} | {levelname:.1} | {name} | {message}'
     )
     logger = logging.getLogger(__name__)
 
