@@ -3,3 +3,4 @@ motorengine
 arrow
 psutil
 humanfriendly
+pyyaml

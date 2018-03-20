@@ -1,6 +1,6 @@
 import motorengine
 from motorengine.document import Document
-from motorengine.fields import IntField, ListField, StringField
+from motorengine.fields import IntField, ListField
 
 
 class GuildSettings(Document):
@@ -10,8 +10,8 @@ class GuildSettings(Document):
 
 
 class Database:
-    def __init__(self, database: str, connection_string: str):
-        self.connection = motorengine.connect(database, host=connection_string)
+    def __init__(self, config: dict):
+        self.connection = motorengine.connect(db=config['name'], host=config['connection_string'])
 
     async def get_guild_settings(self, guild_id: int):
         settings = await GuildSettings.objects.get(guild_id=guild_id)
@@ -28,4 +28,3 @@ class Database:
         settings = await self.get_guild_settings(guild_id)
         setattr(settings, setting, value)
         settings.save()
-

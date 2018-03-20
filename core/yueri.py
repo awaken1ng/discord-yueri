@@ -1,18 +1,58 @@
 import discord
 import utils
-import logging
 import re
-from config import prefix, plugins_location, database, database_connection_string
 from core.plugin_manager import PluginManager
 from core.database import Database
+from core.logger import Logger
+from typing import Union
 
 
 class Yueri(discord.Client):
-    def __init__(self):
-        self.prefix = prefix
-        self.db = Database(database, database_connection_string)
-        self.plugin_manager = PluginManager(plugins_location, self)
+    def __init__(self, config):
+        self.config = config
+        self.log = Logger(config['Logging'])
+        self._logger = self.log.get_logger('Client')
+        self._logger.info('Starting up')
+
+        self.prefix = config['Client']['prefix']
+        self.db = Database(config['Database'])
+        self.plugin_manager = PluginManager(config['Client']['plugins_location'], self)
         super(Yueri, self).__init__()
+
+    def check_permissions(self, user: Union[discord.Member, discord.User], permitted_groups: list) -> bool:
+        if not permitted_groups:
+            return True
+
+        permissions = self.config['Permissions']
+        # Get list of Discord permissions
+        _discord_permissions = [prop
+                                for prop, value in vars(discord.Permissions).items()
+                                if isinstance(value, property)]
+        # Check against permission groups in config
+        allowed_groups = list(filter(
+            lambda g: g if g not in _discord_permissions else None,
+            permitted_groups
+        ))
+        for group in allowed_groups:
+            # Check user IDs
+            if 'users' in permissions[group].keys():
+                if user.id in permissions[group]['users']:
+                    return True
+            # Check role IDs
+            if 'roles' in permissions[group].keys():
+                for role in user.roles:
+                    if role.id in permissions[group]['roles']:
+                        return True
+
+        # Check user permissions
+        allowed_permissions = list(filter(
+            lambda p: p if p in _discord_permissions else None,
+            permitted_groups))
+        for permission in allowed_permissions:
+            if getattr(user.guild_permissions, permission, False):
+                return True
+
+        return False
 
     #  _____                 _         _ _                 _       _
     # | ____|_   _____ _ __ | |_    __| (_)___ _ __   __ _| |_ ___| |__   ___ _ __ ___
@@ -21,12 +61,12 @@ class Yueri(discord.Client):
     # |_____| \_/ \___|_| |_|\__|  \__,_|_|___/ .__/ \__,_|\__\___|_| |_|\___|_|  |___/
     #                                         |_|
 
+    async def on_connect(self):
+        self._logger.info('Established connection to Discord')
+
     async def on_ready(self):
-        logging.info(f'Logged in as {self.user.name}#{self.user.discriminator} with user ID {self.user.id}')
-        # Return if there are no plugins with `on_ready` implemented
-        if 'on_ready' not in self.plugin_manager.events.keys():
-            return
-        for plugin in self.plugin_manager.events['on_ready']:
+        self._logger.info(f'Logged in as {self.user.name}#{self.user.discriminator} with user ID {self.user.id}')
+        for plugin in self.plugin_manager.events.get('on_ready', []):
             # Server check, if bot is not in any of the guilds, skip the event execution for this plugin
             if not any([self.get_guild(server_id)
                         for server_id in getattr(plugin, 'servers', ())]):
@@ -41,14 +81,14 @@ class Yueri(discord.Client):
         if isinstance(message.channel, (discord.DMChannel, discord.GroupChannel)):
             return
         # Ignore messages that don't start with prefix
-        if not message.content.startswith(prefix):
+        if not message.content.startswith(self.prefix):
             return
         # Ignore bot users
         if message.author.bot:
             return
 
         # Parse the message
-        match = re.match(rf'{prefix}([^\s]+)\s?(.+)?', message.content)
+        match = re.match(rf'{self.prefix}([^\s]+)\s?(.+)?', message.content)
         if not match:
             # Shouldn't ever happen, but just in case
             return
@@ -65,22 +105,20 @@ class Yueri(discord.Client):
             servers = getattr(plugin, 'servers', ())
             if servers and message.guild.id not in servers:
                 continue
-            logging.info(
-                f"User '{message.author.name}#{message.author.discriminator}' ({message.author.id}) "
-                f"on server '{message.guild.name}' ({message.guild.id}) "
-                f"used command '{plugin.name}' with trigger '{trigger}' and arguments: {args}")
+            self._logger.info(
+                f"{message.author.name}#{message.author.discriminator} ({message.author.id}) "
+                f"on server {message.guild.name} ({message.guild.id}) "
+                f"used command {plugin.name} with trigger {trigger} and arguments: {args}")
             # Permission check
             if getattr(plugin, 'permissions', None):
-                if not utils.is_permitted(message.author, plugin.permissions):
+                if not self.check_permissions(message.author, plugin.permissions):
                     continue
             # Execute plugin
             await plugin.on_message(message, trigger, args.split() if args else None)
 
     async def on_member_join(self, member: discord.Member):
-        # Return if there are no plugins with `on_member_join` implemented
-        if 'on_member_join' not in self.plugin_manager.events.keys():
-            return
-        for plugin in self.plugin_manager.events['on_member_join']:
+        self._logger.info(f"{member.name}#{member.discriminator} ({member.id}) has joined {member.guild.name}")
+        for plugin in self.plugin_manager.events.get('on_member_join', []):
             # If plugin is server-restricted, do a check
             servers = getattr(plugin, 'servers', ())
             if servers and member.guild.id not in servers:

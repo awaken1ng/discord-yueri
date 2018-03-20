@@ -1,15 +1,12 @@
 import os
-import sys
 import importlib
-import logging
 
-
-logger = logging.getLogger('plugman')
 
 class PluginManager:
     def __init__(self, plugins_location: str, bot_instance):
-        logger.info('Initializing plugin manager')
         self.bot = bot_instance
+        self._logger = bot_instance.log.get_logger('Plugin manager')
+        self._logger.info('Initializing plugin manager')
 
         self._plugins = []  # Plugin modules
         self.plugins = []  # Instantiated plugins
@@ -35,12 +32,12 @@ class PluginManager:
                             self.events[event_name].append(instantiated_plugin)
                         self._plugins.append(plugin)
                         self.plugins.append(instantiated_plugin)
-                        logger.info(f'{os.path.join(root, file)} loaded')
+                        self._logger.info(f'{os.path.join(root, file)} loaded')
                     except AttributeError:
-                        logging.error(f'! Failed to load {os.path.join(root, file)}')
+                        self._logger.error(f'Failed to load {os.path.join(root, file)}')
 
         self._sort_on_message()
-        logger.info('Initialized')
+        self._logger.info('Initialized')
 
     def _sort_on_message(self):
         """Sort `on_message` events into {trigger: [plugins]} dictionary"""
@@ -55,12 +52,12 @@ class PluginManager:
             self.events['on_message'] = trigger_to_plugin
 
     def reload(self):
-        logger.info('Reloading plugins')
+        self._logger.info('Reloading plugins')
         # Invalidate instantiated plugins
         self.plugins.clear()
         self.events.clear()
         for plugin in self._plugins:
-            logger.info(f'Reloading {plugin.Plugin.name}')
+            self._logger.info(f'Reloading {plugin.Plugin.name}')
             importlib.reload(plugin)  # Reload module
             instantiated_plugin = plugin.Plugin(self.bot)  # Reinstantiate
             # Iterate over implemented events
@@ -72,4 +69,4 @@ class PluginManager:
                 self.events[event_name].append(instantiated_plugin)
             self.plugins.append(instantiated_plugin)
         self._sort_on_message()
-        logger.info('Reloaded')
+        self._logger.info('Reloaded')

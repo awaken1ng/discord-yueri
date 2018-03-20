@@ -3,8 +3,8 @@ from core.yueri import Yueri
 
 
 class BasePlugin:
-    name = ''  # Plugin name
-    description = ''  # Plugin description
+    name = ''
+    description = ''
     permissions = ()  # Required permission group(s)
     triggers = ()  # Triggers
     servers = ()  # Servers to run the plugin in
@@ -12,6 +12,7 @@ class BasePlugin:
 
     def __init__(self, bot_instance: Yueri):
         self.bot = bot_instance
+        self.logger = bot_instance.log.get_logger(self.name)
 
     async def on_ready(self):
         pass

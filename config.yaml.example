@@ -1,0 +1,27 @@
+Client:
+  prefix: '!'
+  token: ''
+  plugins_location: 'plugins'
+
+Logging:
+  name: 'yueri'
+  location: 'logs'
+  # https://docs.python.org/3/library/logging.handlers.html#timedrotatingfilehandler
+  utc: true
+  interval:
+    type: 'midnight'
+    value: 1
+
+Database:
+  name: 'yueri'
+  connection_string: 'mongodb://localhost:27017/'
+
+# Permissions:
+#   owner:
+#     users:
+#       - 00000000000000000
+#   adm:
+#     users:
+#       - 00000000000000000
+#     roles:
+#       - 00000000000000000
