@@ -3,9 +3,9 @@ import importlib
 
 
 class PluginManager:
-    def __init__(self, plugins_location: str, bot_instance):
-        self.bot = bot_instance
-        self._logger = bot_instance.log.get_logger('Plugin manager')
+    def __init__(self, bot):
+        self.bot = bot
+        self._logger = bot.log.get_logger('Plugin manager')
         self._logger.info('Initializing plugin manager')
 
         self._plugins = []  # Plugin modules
@@ -13,6 +13,7 @@ class PluginManager:
         self.events = {}  # Dictionary of events to list of plugins that have implemented that event
 
         # Walk down the plugins folder and load them
+        plugins_location = bot.config['Client']['plugins_location']
         for root, folders, files in os.walk(plugins_location):
             for file in files:
                 filename, ext = os.path.splitext(file)

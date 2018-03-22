@@ -10,8 +10,17 @@ class GuildSettings(Document):
 
 
 class Database:
-    def __init__(self, config: dict):
-        self.connection = motorengine.connect(db=config['name'], host=config['connection_string'])
+    def __init__(self, bot):
+        self.bot = bot
+        self._logger = bot.log.get_logger('Database')
+
+        config = bot.config['Database']
+        self.client = motorengine.connect(db=config['name'], host=config['connection_string'])
+        self.bot.loop.create_task(self._startup_check())
+
+    async def _startup_check(self):
+        server_info = await self.client.connection.server_info()
+        self._logger.info(f"Connected to MongoDB v{server_info['version']}")
 
     async def get_guild_settings(self, guild_id: int):
         settings = await GuildSettings.objects.get(guild_id=guild_id)

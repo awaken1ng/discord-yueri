@@ -1,23 +1,27 @@
 import discord
+from discord.gateway import DiscordWebSocket
 import utils
 import re
 from core.plugin_manager import PluginManager
 from core.database import Database
 from core.logger import Logger
+from core.influx import Influx
 from typing import Union
 
 
 class Yueri(discord.Client):
     def __init__(self, config):
+        super(Yueri, self).__init__()
+
         self.config = config
         self.log = Logger(config['Logging'])
         self._logger = self.log.get_logger('Client')
         self._logger.info('Starting up')
 
         self.prefix = config['Client']['prefix']
-        self.db = Database(config['Database'])
-        self.plugin_manager = PluginManager(config['Client']['plugins_location'], self)
-        super(Yueri, self).__init__()
+        self.db = Database(self)
+        self.plugin_manager = PluginManager(self)
+        self.influx = Influx(self)
 
     def check_permissions(self, user: Union[discord.Member, discord.User], permitted_groups: list) -> bool:
         if not permitted_groups:
@@ -61,6 +65,14 @@ class Yueri(discord.Client):
     # |_____| \_/ \___|_| |_|\__|  \__,_|_|___/ .__/ \__,_|\__\___|_| |_|\___|_|  |___/
     #                                         |_|
 
+    async def on_socket_response(self, msg: dict):
+        # Latency monitoring
+        if msg.get('op') == DiscordWebSocket.HEARTBEAT_ACK:
+            await self.influx.write({
+                'measurement': 'latency',
+                'fields': {'ms': self.latency * 1000}
+            })
+
     async def on_connect(self):
         self._logger.info('Established connection to Discord')
 
@@ -74,6 +86,11 @@ class Yueri(discord.Client):
             await plugin.on_ready()
 
     async def on_message(self, message: discord.Message):
+        await self.influx.write({
+            'measurement': 'events',
+            'fields': {'event': 'on_message'}
+        })
+
         # Return if there are no plugins with `on_message` implemented
         if 'on_message' not in self.plugin_manager.events.keys():
             return
@@ -99,6 +116,11 @@ class Yueri(discord.Client):
         if not matched_plugins:
             return
 
+        await self.influx.write({
+            'measurement': 'events',
+            'fields': {'event': 'on_command'}
+        })
+
         # Execute the matched plugins
         for plugin in matched_plugins:
             # If plugin is server-restricted, do a check
@@ -107,7 +129,7 @@ class Yueri(discord.Client):
                 continue
             self._logger.info(
                 f"{message.author.name}#{message.author.discriminator} ({message.author.id}) "
-                f"on server {message.guild.name} ({message.guild.id}) "
+                f"on {message.guild.name} ({message.guild.id}) "
                 f"used command {plugin.name} with trigger {trigger} and arguments: {args}")
             # Permission check
             if getattr(plugin, 'permissions', None):
@@ -117,7 +139,7 @@ class Yueri(discord.Client):
             await plugin.on_message(message, trigger, args.split() if args else None)
 
     async def on_member_join(self, member: discord.Member):
-        self._logger.info(f"{member.name}#{member.discriminator} ({member.id}) has joined {member.guild.name}")
+        self._logger.info(f"{member.name}#{member.discriminator} ({member.id}) has joined {member.guild.name} ({member.guild.id})")
         for plugin in self.plugin_manager.events.get('on_member_join', []):
             # If plugin is server-restricted, do a check
             servers = getattr(plugin, 'servers', ())
@@ -125,9 +147,5 @@ class Yueri(discord.Client):
                 return
             await plugin.on_member_join(member)
 
-
-
-
-
-
-
+    async def on_member_remove(self, member: discord.Member):
+        self._logger.info(f"{member.name}#{member.discriminator} ({member.id}) has left {member.guild.name} ({member.guild.id})")

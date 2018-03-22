@@ -4,3 +4,4 @@ arrow
 psutil
 humanfriendly
 pyyaml
+aioinflux

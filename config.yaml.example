@@ -25,3 +25,13 @@ Database:
 #       - 00000000000000000
 #     roles:
 #       - 00000000000000000
+
+Monitoring:
+  enabled: false
+    influx:
+    db: 'yueri'
+    host: 'localhost'
+    port: 8086
+    ssl: true
+    username: ''
+    password: ''
