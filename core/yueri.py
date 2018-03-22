@@ -88,7 +88,8 @@ class Yueri(discord.Client):
     async def on_message(self, message: discord.Message):
         await self.influx.write({
             'measurement': 'events',
-            'fields': {'event': 'on_message'}
+            'fields': {'event': 'on_message'},
+            'tags': {'event': 'on_message'}
         })
 
         # Return if there are no plugins with `on_message` implemented
@@ -118,7 +119,8 @@ class Yueri(discord.Client):
 
         await self.influx.write({
             'measurement': 'events',
-            'fields': {'event': 'on_command'}
+            'fields': {'event': 'on_command'},
+            'tags': {'event': 'on_command'},
         })
 
         # Execute the matched plugins
