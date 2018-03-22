@@ -52,6 +52,22 @@ def create_embed(title:       str = EmptyEmbed,
     return response
 
 
+def get_colour(item: Union[discord.Member, discord.Role]) -> int:
+    if isinstance(item, discord.Member):
+        return item.top_role.colour
+    if isinstance(item, discord.Role):
+        return item.colour
+    return 0
+
+
+def get_icon(item: Union[discord.Guild, discord.User, discord.Member]) -> Union[str, EmptyEmbed]:
+    if isinstance(item, discord.Guild):
+        return item.icon_url
+    if isinstance(item, (discord.User, discord.Member)):
+        return item.avatar_url
+    return EmptyEmbed
+
+
 def catch(exception, address_user: bool = False, **response):
     """Decorator that catches specified exception and responds in the channel
     :param exception: Exception to catch, if passed with arguments, iterates over keyword arguments and formats them with said arguments
