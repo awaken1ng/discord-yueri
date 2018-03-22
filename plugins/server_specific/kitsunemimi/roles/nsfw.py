@@ -64,13 +64,11 @@ class Plugin(ServerPlugin):
 
         # Assign the role if user doesn't have it
         if nsfw_role not in message.author.roles:
-            nsfw_channel = utils.find(lambda c: c.id == 223235682322087937, message.author.guild.channels)
-            nsfw_foxgirls_channel = utils.find(lambda c: c.id == 222553018208485376, message.author.guild.channels)
-            nsfw_holoposting_channel = utils.find(lambda c: c.id == 255055081957883914, message.author.guild.channels)
+            nsfw_category = utils.find(lambda c: c.id == 422554067706052618, message.guild.categories)
+            nsfw_channels = ', '.join([f'#{ch.name}' for ch in nsfw_category.channels])
             yes = 'yes'
             no = 'no'
-            consent = f'{nsfw_role.name} role gives you access to ' \
-                      f'#{nsfw_channel.name}, #{nsfw_foxgirls_channel.name} and #{nsfw_holoposting_channel.name}.\n' \
+            consent = f'{nsfw_role.name} role gives you access to {nsfw_channels}.\n' \
                        '**You must be 18 years or older to apply for this role.**\n' \
                        'Your local laws about pornography or consent does not mean jack shit in this server.\n' \
                        '**If you are underage and have this role you will be permabanned from this server, no exceptions.**\n\n' \
