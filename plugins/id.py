@@ -16,21 +16,19 @@ class Plugin(BasePlugin):
 
         if where in ('g', 'guild'):
             item = message.guild
-        elif where in ('cat', 'category'):
-            items = message.guild.categories
-        elif where in ('ch', 'channel'):
-            items = message.guild.channels
-        elif where in ('vc', 'voice'):
-            items = message.guild.voice_channels
-        elif where in ('r', 'role'):
-            items = message.guild.roles
-        elif where in ('u', 'user'):
-            items = message.guild.members
-            icon = lambda i: i.avatar_url
         else:
-            return
-
-        if 'item' not in locals().keys():
+            if where in ('cat', 'category'):
+                items = message.guild.categories
+            elif where in ('ch', 'channel'):
+                items = message.guild.channels
+            elif where in ('vc', 'voice'):
+                items = message.guild.voice_channels
+            elif where in ('r', 'role'):
+                items = message.guild.roles
+            elif where in ('u', 'user'):
+                items = message.guild.members
+            else:
+                return
             item = utils.find(lambda i: i.name.lower() == what.lower(), items)
 
         if item:

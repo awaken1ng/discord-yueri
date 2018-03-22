@@ -1,5 +1,5 @@
 import discord
-from discord.embeds import EmptyEmbed
+from discord.embeds import EmptyEmbed, _EmptyEmbed
 from discord.utils import find
 from functools import wraps
 import datetime
@@ -60,7 +60,7 @@ def get_colour(item: Union[discord.Member, discord.Role]) -> int:
     return 0
 
 
-def get_icon(item: Union[discord.Guild, discord.User, discord.Member]) -> Union[str, EmptyEmbed]:
+def get_icon(item: Union[discord.Guild, discord.User, discord.Member]) -> Union[str, _EmptyEmbed]:
     if isinstance(item, discord.Guild):
         return item.icon_url
     if isinstance(item, (discord.User, discord.Member)):

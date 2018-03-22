@@ -32,7 +32,7 @@ class Plugin(ServerPlugin):
 
     async def on_message(self, message: discord.Message, trigger: str, args: list):
         nsfw_role = utils.find(lambda r: r.id == 398288236817940480, message.author.guild.roles)
-        log_channel = utils.find(lambda c: c.id == 422762236189081600, message.author.guild.channels)
+        log_channel = utils.find(lambda ch: ch.id == 422762236189081600, message.author.guild.channels)
 
         # Check if user is in a list of known underage
         underage = await self.bot.db.get_guild_setting(message.author.guild.id, 'underage')
@@ -64,7 +64,7 @@ class Plugin(ServerPlugin):
 
         # Assign the role if user doesn't have it
         if nsfw_role not in message.author.roles:
-            nsfw_category = utils.find(lambda c: c.id == 422554067706052618, message.guild.categories)
+            nsfw_category = utils.find(lambda cat: cat.id == 422554067706052618, message.guild.categories)
             nsfw_channels = ', '.join([f'#{ch.name}' for ch in nsfw_category.channels])
             yes = 'yes'
             no = 'no'
