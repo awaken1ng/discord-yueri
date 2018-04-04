@@ -23,10 +23,11 @@ class Logger:
         file_handler.setFormatter(formatter)
 
         self.handlers = (console_handler, file_handler)
+        self.level = config['level']
 
-    def get_logger(self, name: str, level: int = logging.INFO):
+    def get_logger(self, name: str):
         logger = logging.getLogger(name)
-        logger.setLevel(level)
+        logger.setLevel(self.level)
         for handler in self.handlers:
             logger.addHandler(handler)
         return logger
