@@ -1,4 +1,5 @@
 import aioinflux
+import aiohttp
 
 
 class Influx:
@@ -29,6 +30,7 @@ class Influx:
     async def write(self, data: dict):
         if not self.client or not self.bot.user:
             # Monitoring is disabled or client didn't initialize yet
+            self._logger.debug(f'Disabled or client is not ready: {data}')
             return
 
         # Add `client_id` tag
@@ -38,5 +40,9 @@ class Influx:
         else:
             if 'client_id' not in data['tags'].keys():
                 data['tags']['client_id'] = str(self.bot.user.id)
-        await self.client.write(data)
 
+        try:
+            await self.client.write(data)
+            self._logger.debug(f'Report sent: {data}')
+        except aiohttp.client_exceptions.ClientConnectionError as error:
+            self._logger.error(f'Failed to report: {data}, due to {error}')
