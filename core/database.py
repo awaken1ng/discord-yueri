@@ -1,6 +1,7 @@
 import motorengine
 from motorengine.document import Document
 from motorengine.fields import IntField, ListField
+from pymongo.errors import ServerSelectionTimeoutError
 
 
 class GuildSettings(Document):
@@ -19,8 +20,12 @@ class Database:
         self.bot.loop.create_task(self._startup_check())
 
     async def _startup_check(self):
-        server_info = await self.client.connection.server_info()
-        self._logger.info(f"Connected to MongoDB v{server_info['version']}")
+        try:
+            server_info = await self.client.connection.server_info()
+            self._logger.info(f"Connected to MongoDB v{server_info['version']}")
+        except ServerSelectionTimeoutError as error:
+            self._logger.critical('Could not establish connection to MongoDB')
+            raise error
 
     async def get_guild_settings(self, guild_id: int):
         settings = await GuildSettings.objects.get(guild_id=guild_id)
