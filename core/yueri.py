@@ -12,7 +12,6 @@ from typing import Union
 class Yueri(discord.Client):
     def __init__(self, config):
         super(Yueri, self).__init__()
-
         self.config = config
         self.log = Logger(config['Logging'])
         self._logger = self.log.get_logger('Client')
@@ -65,14 +64,6 @@ class Yueri(discord.Client):
     # |_____| \_/ \___|_| |_|\__|  \__,_|_|___/ .__/ \__,_|\__\___|_| |_|\___|_|  |___/
     #                                         |_|
 
-    async def on_socket_response(self, msg: dict):
-        # Latency monitoring
-        if msg.get('op') == DiscordWebSocket.HEARTBEAT_ACK:
-            await self.influx.write({
-                'measurement': 'latency',
-                'fields': {'ms': self.latency * 1000}
-            })
-
     async def on_connect(self):
         self._logger.info('Established connection to Discord')
 
@@ -80,10 +71,18 @@ class Yueri(discord.Client):
         self._logger.info(f'Logged in as {self.user.name}#{self.user.discriminator} with user ID {self.user.id}')
         for plugin in self.plugin_manager.events.get('on_ready', []):
             # Server check, if bot is not in any of the guilds, skip the event execution for this plugin
-            if not any([self.get_guild(server_id)
-                        for server_id in getattr(plugin, 'servers', ())]):
+            servers = getattr(plugin, 'servers', ())
+            if servers and not any([self.get_guild(server_id) for server_id in servers]):
                 continue
             await plugin.on_ready()
+
+    async def on_socket_response(self, msg: dict):
+        # Latency monitoring
+        if msg.get('op') == DiscordWebSocket.HEARTBEAT_ACK:
+            await self.influx.write({
+                'measurement': 'latency',
+                'fields': {'ms': self.latency * 1000}
+            })
 
     async def on_message(self, message: discord.Message):
         await self.influx.write({
