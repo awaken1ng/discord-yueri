@@ -10,6 +10,10 @@ from typing import Union
 
 
 class Yueri(discord.Client):
+    Discord_Permissions = [prop
+                           for prop, value in vars(discord.Permissions).items()
+                           if isinstance(value, property)]
+
     def __init__(self, config):
         super(Yueri, self).__init__()
         self.config = config
@@ -28,12 +32,10 @@ class Yueri(discord.Client):
 
         permissions = self.config['Permissions']
         # Get list of Discord permissions
-        _discord_permissions = [prop
-                                for prop, value in vars(discord.Permissions).items()
-                                if isinstance(value, property)]
+
         # Check against permission groups in config
         allowed_groups = list(filter(
-            lambda g: g if g not in _discord_permissions else None,
+            lambda g: g if g not in self.Discord_Permissions else None,
             permitted_groups
         ))
         for group in allowed_groups:
@@ -49,7 +51,7 @@ class Yueri(discord.Client):
 
         # Check user permissions
         allowed_permissions = list(filter(
-            lambda p: p if p in _discord_permissions else None,
+            lambda p: p if p in self.Discord_Permissions else None,
             permitted_groups))
         for permission in allowed_permissions:
             if getattr(user.guild_permissions, permission, False):
