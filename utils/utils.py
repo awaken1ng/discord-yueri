@@ -3,7 +3,7 @@ from discord.embeds import EmptyEmbed, _EmptyEmbed
 from discord.utils import find
 from functools import wraps
 import datetime
-from typing import Tuple, Union
+from typing import Union, Sequence, Tuple
 
 
 class Colours:
@@ -13,22 +13,20 @@ class Colours:
     info = 0x209CEE
 
 
-def create_embed(title:       str = EmptyEmbed,
+def create_embed(title: str = EmptyEmbed,
                  description: str = EmptyEmbed,
-                 fields:      Union[Tuple[str, str, bool], Tuple[str, str]] = None,
-                 footer:      str = EmptyEmbed,
-                 colour:      int = None,
-                 url:         str = EmptyEmbed,
-                 icon:        str = EmptyEmbed,
+                 fields: Sequence[Union[Tuple[str, str, bool], Tuple[str, str]]] = None,
+                 footer: str = EmptyEmbed,
+                 colour: int = None,
+                 url: str = EmptyEmbed,
+                 icon: str = EmptyEmbed,
                  footer_icon: str = EmptyEmbed,
-                 thumbnail:   str = None,
-                 image:       str = None,
-                 timestamp:   datetime.datetime = EmptyEmbed):
+                 thumbnail: str = None,
+                 image: str = None,
+                 timestamp: datetime.datetime = EmptyEmbed) -> discord.Embed:
     response = discord.Embed()
     if title:
         response.set_author(name=title, url=url, icon_url=icon)
-    if description:
-        response.description = description
     if fields:
         for field in fields:
             name = field[0]
@@ -44,10 +42,9 @@ def create_embed(title:       str = EmptyEmbed,
         response.set_thumbnail(url=thumbnail)
     if image:
         response.set_image(url=image)
-    if timestamp:
-        response.timestamp = timestamp
-    if footer:
-        response.set_footer(text=footer, icon_url=footer_icon)
+    response.description = description
+    response.timestamp = timestamp
+    response.set_footer(text=footer, icon_url=footer_icon)
 
     return response
 
@@ -70,7 +67,7 @@ def get_icon(item: Union[discord.Guild, discord.User, discord.Member]) -> Union[
 
 def catch(exception, address_user: bool = False, **response):
     """Decorator that catches specified exception and responds in the channel
-    :param exception: Exception to catch, if passed with arguments, iterates over keyword arguments and formats them with said arguments
+    :param exception: Exception to catch, if raised with arguments, iterates over keyword arguments and formats them with said arguments
     :param address_user: Overrides title and icon with values from `message.author.display_name` and `message.author.avatar_url`
     :param response: Keyword arguments to pass into create_embed()
     """
@@ -90,7 +87,7 @@ def catch(exception, address_user: bool = False, **response):
                     # Override title and icon
                     response['title'] = message.author.display_name
                     response['icon'] = message.author.avatar_url
-                # Do not modify original dictionary
+                # Do not modify original dictionary, it's passed once
                 formatted_response = {key: response[key].format(*error.args)
                                       if isinstance(response[key], str) else
                                       response[key]
