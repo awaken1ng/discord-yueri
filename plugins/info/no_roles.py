@@ -7,7 +7,7 @@ class Plugin(BasePlugin):
     name = 'No roles list'
     description = 'List members with no roles'
     triggers = ('noroles',)
-    permissions = ('manage_roles',)
+    permissions = ('manage_roles', 'kitsunemimi_mods')
 
     async def on_message(self, message: discord.Message, trigger: str, args: list):
         no_roles = [member
