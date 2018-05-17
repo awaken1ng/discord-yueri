@@ -6,7 +6,7 @@ from . import ServerPlugin
 class Plugin(ServerPlugin):
     name = '/r/kitsunemimi underage list controller'
     triggers = ('underage', 'underage?')
-    permissions = ('manage_roles',)
+    permissions = ('kitsunemimi_mods',)
 
     async def on_message(self, message: discord.Message, trigger: str, args: list):
         guild = message.author.guild

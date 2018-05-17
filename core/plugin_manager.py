@@ -46,6 +46,7 @@ class PluginManager:
             trigger_to_plugin = {}
             for plugin in self.events['on_message']:
                 for trigger in getattr(plugin, 'triggers', ()):
+                    trigger = trigger.lower()
                     if trigger not in trigger_to_plugin.keys():
                         trigger_to_plugin[trigger] = []
                     trigger_to_plugin[trigger].append(plugin)

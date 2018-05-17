@@ -10,6 +10,7 @@ from typing import Union
 
 
 class Yueri(discord.Client):
+    # Get list of Discord permissions
     Discord_Permissions = [prop
                            for prop, value in vars(discord.Permissions).items()
                            if isinstance(value, property)]
@@ -31,8 +32,6 @@ class Yueri(discord.Client):
             return True
 
         permissions = self.config['Permissions']
-        # Get list of Discord permissions
-
         # Check against permission groups in config
         allowed_groups = list(filter(
             lambda g: g if g not in self.Discord_Permissions else None,
@@ -114,7 +113,7 @@ class Yueri(discord.Client):
         trigger, args = match.groups()
 
         # Match the trigger with plugins
-        matched_plugins = self.plugin_manager.events['on_message'].get(trigger)
+        matched_plugins = self.plugin_manager.events['on_message'].get(trigger.lower())
         if not matched_plugins:
             return
 
