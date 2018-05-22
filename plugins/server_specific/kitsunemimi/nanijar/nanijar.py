@@ -12,7 +12,7 @@ class Plugin(BasePlugin):
         if not settings.counters:
             response = create_embed(title='The jar is empty')
         else:
-            worth = 0.25
+            worth = 25
             author_total = 0
             server_total = 0
             for channel_id, values in settings.counters['nani'].items():
@@ -21,16 +21,16 @@ class Plugin(BasePlugin):
                     channel_total = 0
                     for user_id, count in values.items():
                         if int(user_id) == message.author.id:
-                            author_total += 1
+                            author_total += count
                         if channel.id == message.channel.id:
                             channel_total += count
                         server_total += count
 
-            desc = f"You've contributed {author_total * worth}$ to the Nani Jar\n" \
-                   f"This channel contributed {channel_total * worth}$ to the Nani Jar\n" \
-                   f"There's {server_total * worth}$ in the Nani Jar"
+            desc = f"You have contributed ¥{author_total * worth} to the Nani Jar\n" \
+                   f"This channel contributed ¥{channel_total * worth} to the Nani Jar\n" \
+                   f"There is ¥{server_total * worth} in the Nani Jar"
             response = create_embed(
-                title='💵 Nani jar',
+                title='💴 Nani jar',
                 description=desc,
                 colour=message.guild.me.colour)
         await message.channel.send(embed=response)
