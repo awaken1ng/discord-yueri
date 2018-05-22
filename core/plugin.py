@@ -6,7 +6,7 @@ class BasePlugin:
     name = ''
     description = ''
     permissions = ()  # Required permission group(s)
-    triggers = ()  # Triggers
+    triggers = ()  # Words that trigger on_message() execution, if not set then executes on every message
     servers = ()  # Servers to run the plugin in
     disabled = False
 

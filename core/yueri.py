@@ -93,27 +93,27 @@ class Yueri(discord.Client):
         })
 
         # Return if there are no plugins with `on_message` implemented
-        if 'on_message' not in self.plugin_manager.events.keys():
+        if 'on_message' not in self.plugin_manager.events.keys() or \
+                'on_message_global' not in self.plugin_manager.events.keys():
             return
         # Ignore direct messages and group channels
         if isinstance(message.channel, (discord.DMChannel, discord.GroupChannel)):
-            return
-        # Ignore messages that don't start with prefix
-        if not message.content.startswith(self.prefix):
             return
         # Ignore bot users
         if message.author.bot:
             return
 
+        matched_plugins = list(self.plugin_manager.events.get('on_message_global'))  # wrap in list() to get a copy and not a reference
         # Parse the message
+        trigger, args = None, None
         match = re.match(rf'{self.prefix}([^\s]+)\s?(.+)?', message.content)
-        if not match:
-            # Shouldn't ever happen, but just in case
-            return
-        trigger, args = match.groups()
+        if match:
+            # Match the trigger with plugins
+            trigger, args = match.groups()
+            plugins = self.plugin_manager.events['on_message'].get(trigger.lower())
+            if plugins:
+                matched_plugins += plugins
 
-        # Match the trigger with plugins
-        matched_plugins = self.plugin_manager.events['on_message'].get(trigger.lower())
         if not matched_plugins:
             return
 
@@ -126,13 +126,13 @@ class Yueri(discord.Client):
         # Execute the matched plugins
         for plugin in matched_plugins:
             # If plugin is server-restricted, do a check
-            servers = getattr(plugin, 'servers', ())
-            if servers and message.guild.id not in servers:
+            if plugin.servers and message.guild.id not in plugin.servers:
                 continue
-            self._logger.info(
-                f"{message.author.name}#{message.author.discriminator} ({message.author.id}) "
-                f"on {message.guild.name} ({message.guild.id}) "
-                f"used command {plugin.name} with trigger {trigger} and arguments: {args}")
+            if trigger and plugin.triggers:
+                self._logger.info(
+                    f"{message.author.name}#{message.author.discriminator} ({message.author.id}) "
+                    f"on {message.guild.name} ({message.guild.id}) "
+                    f"used command {plugin.name} with trigger {trigger} and arguments: {args}")
             # Permission check
             if getattr(plugin, 'permissions', None):
                 if not self.check_permissions(message.author, plugin.permissions):

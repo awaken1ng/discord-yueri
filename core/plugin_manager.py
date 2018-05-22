@@ -44,12 +44,17 @@ class PluginManager:
         """Sort `on_message` events into {trigger: [plugins]} dictionary"""
         if 'on_message' in self.events.keys():
             trigger_to_plugin = {}
+            self.events['on_message_global'] = []
             for plugin in self.events['on_message']:
-                for trigger in getattr(plugin, 'triggers', ()):
-                    trigger = trigger.lower()
-                    if trigger not in trigger_to_plugin.keys():
-                        trigger_to_plugin[trigger] = []
-                    trigger_to_plugin[trigger].append(plugin)
+                triggers = getattr(plugin, 'triggers', ())
+                if not triggers:
+                    self.events['on_message_global'].append(plugin)
+                else:
+                    for trigger in triggers:
+                        trigger = trigger.lower()
+                        if trigger not in trigger_to_plugin.keys():
+                            trigger_to_plugin[trigger] = []
+                        trigger_to_plugin[trigger].append(plugin)
             self.events['on_message'].clear()
             self.events['on_message'] = trigger_to_plugin
 
