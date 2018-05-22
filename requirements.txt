@@ -1,5 +1,5 @@
 https://github.com/Rapptz/discord.py/archive/rewrite.zip#egg=discord.py[voice]
-motorengine
+umongo[motor]
 arrow
 psutil
 humanfriendly

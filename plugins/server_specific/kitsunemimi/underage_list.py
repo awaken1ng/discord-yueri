@@ -10,7 +10,6 @@ class Plugin(ServerPlugin):
 
     async def on_message(self, message: discord.Message, trigger: str, args: list):
         guild = message.author.guild
-        member = message.author
         settings = await self.bot.db.get_guild_settings(guild.id)
 
         if trigger == 'underage':
@@ -36,7 +35,7 @@ class Plugin(ServerPlugin):
                     else:
                         action = ('removed', 'from')
                         settings.underage.remove(user.id)
-                    settings.save()
+                    await settings.commit()
 
                     response = utils.create_embed(
                         title='{} has been {} {} underage list.'.format(user.display_name, *action),

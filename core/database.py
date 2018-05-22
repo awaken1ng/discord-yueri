@@ -1,13 +1,18 @@
-import motorengine
-from motorengine.document import Document
-from motorengine.fields import IntField, ListField
+from motor.motor_asyncio import AsyncIOMotorClient
+from umongo import MotorAsyncIOInstance, Document
+from umongo.fields import IntegerField, ListField, DictField
 from pymongo.errors import ServerSelectionTimeoutError
 
 
+instance = MotorAsyncIOInstance()
+
+
+@instance.register
 class GuildSettings(Document):
-    guild_id = IntField(required=True)
-    toggleable_roles = ListField(IntField())  # List of toggleable role IDs
-    underage = ListField(IntField())  # List of IDs of underage users
+    guild_id = IntegerField(required=True)
+    toggleable_roles = ListField(IntegerField())  # List of toggleable role IDs
+    underage = ListField(IntegerField())   # List of IDs of underage users
+    counters = DictField()
 
 
 class Database:
@@ -16,22 +21,24 @@ class Database:
         self._logger = bot.log.get_logger('Database')
 
         config = bot.config['Database']
-        self.client = motorengine.connect(db=config['name'], host=config['connection_string'])
+        self.client = AsyncIOMotorClient(config['connection_string'])
+        self.db = self.client[config['name']]
+        instance.init(self.db)
         self.bot.loop.create_task(self._startup_check())
 
     async def _startup_check(self):
         try:
-            server_info = await self.client.connection.server_info()
+            server_info = await self.client.server_info()
             self._logger.info(f"Connected to MongoDB v{server_info['version']}")
         except ServerSelectionTimeoutError as error:
             self._logger.critical('Could not establish connection to MongoDB')
             raise error
 
     async def get_guild_settings(self, guild_id: int):
-        settings = await GuildSettings.objects.get(guild_id=guild_id)
+        settings = await GuildSettings.find_one({'guild_id': guild_id})
         if not settings:
             settings = GuildSettings(guild_id=guild_id)
-            settings.save()
+            await settings.commit()
         return settings
 
     async def get_guild_setting(self, guild_id: int, setting: str):
@@ -41,4 +48,4 @@ class Database:
     async def set_guild_setting(self, guild_id: int, setting: str, value):
         settings = await self.get_guild_settings(guild_id)
         setattr(settings, setting, value)
-        settings.save()
+        await settings.commit()
