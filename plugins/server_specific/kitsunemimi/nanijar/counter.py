@@ -4,7 +4,7 @@ import re
 
 
 class Plugin(BasePlugin):
-    name = 'Word use counter'
+    name = 'Nani counter'
 
     async def on_message(self, message: discord.Message, trigger: str, args: list):
         result = re.findall(r'na+ni+|何|なに', message.content, flags=re.IGNORECASE)
@@ -15,10 +15,13 @@ class Plugin(BasePlugin):
         if 'nani' not in settings.counters.keys():
             settings.counters['nani'] = {}
 
+        author_id = str(message.author.id)
         channel_id = str(message.channel.id)
         if channel_id not in settings.counters['nani'].keys():
-            settings.counters['nani'][channel_id] = 0
+            settings.counters['nani'][channel_id] = {}
+        if author_id not in settings.counters['nani'][channel_id].keys():
+            settings.counters['nani'][channel_id][author_id] = 0
 
-        settings.counters['nani'][channel_id] += len(result)
+        settings.counters['nani'][channel_id][author_id] += len(result)
         settings.counters._modified = True  # FIXME workaround for DictFields
         await settings.commit()
